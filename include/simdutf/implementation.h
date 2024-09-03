@@ -4,11 +4,15 @@
 #if !defined(SIMDUTF_NO_THREADS)
 #include <atomic>
 #endif
-#include <vector>
 #include <tuple>
-#include "simdutf/common_defs.h"
-#include "simdutf/internal/isadetection.h"
+#include <vector>
 
+#include "simdutf/common_defs.h"
+#include "simdutf/compiler_check.h"
+#include "simdutf/internal/isadetection.h"
+#if SIMDUTF_CPLUSPLUS20
+#include <span>
+#endif
 
 namespace simdutf {
 
@@ -22,10 +26,20 @@ namespace simdutf {
  * @param length the length of the string in bytes.
  * @return the detected encoding type
  */
-simdutf_warn_unused simdutf::encoding_type autodetect_encoding(const char * input, size_t length) noexcept;
-simdutf_really_inline simdutf_warn_unused simdutf::encoding_type autodetect_encoding(const uint8_t * input, size_t length) noexcept {
-  return autodetect_encoding(reinterpret_cast<const char *>(input), length);
+simdutf_warn_unused simdutf::encoding_type autodetect_encoding(const char *input,
+                                                               size_t length) noexcept;
+simdutf_really_inline simdutf_warn_unused simdutf::encoding_type autodetect_encoding(
+    const uint8_t *input, size_t length) noexcept
+{
+    return autodetect_encoding(reinterpret_cast<const char *>(input), length);
 }
+#if SIMDUTF_CPLUSPLUS20
+simdutf_really_inline simdutf_warn_unused simdutf::encoding_type autodetect_encoding(
+    std::span<const char> input) noexcept
+{
+    return autodetect_encoding(input.data(), input.size());
+}
+#endif
 
 /**
  * Autodetect the possible encodings of the input in one pass.
